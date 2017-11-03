@@ -3,6 +3,7 @@ import interpolation
 import matrix_generator
 import numpy as np
 from element import element
+from utilities import split, edge, opp
 
 
 class system(object):
@@ -74,30 +75,18 @@ class system(object):
             for j in xrange(self.ny):
                 self.elements[j][i].setNeighborBoundary(p)
 
-    def set_boundary(self, p, arg_params=[], func=None, typs=["N", "E", "W", "S"], typ=None):
-        if typ is not None:
-            typs = [typ]
-
-        for typ in typs:
-            sub_dict = {arg_param: self.boundaries[arg_param][typ] for arg_param in arg_params}
-            self.boundaries[p][typ] = func(sub_dict)
-
-            if typ == 'N':
-                for i in xrange(self.nx):
-                    self.elements[-1][i].setNeighborBoundary(p, typ=typ, 
-                            val= self.boundaries[p][typ][i*self.mx:(i+1)*self.mx])
-            if typ == 'S':
-                for i in xrange(self.nx):
-                    self.elements[0][i].setNeighborBoundary(p, typ=typ, 
-                            val= self.boundaries[p][typ][i*self.mx:(i+1)*self.mx])
-            if typ == 'E':
-                for j in xrange(self.ny):
-                    self.elements[j][-1].setNeighborBoundary(p, typ=typ, 
-                            val= self.boundaries[p][typ][j*self.mx:(j+1)*self.mx])
-            if typ == 'W':
-                for j in xrange(self.ny):
-                    self.elements[j][0].setNeighborBoundary(p, typ=typ, 
-                            val= self.boundaries[p][typ][j*self.mx:(j+1)*self.mx])
+    def set_boundaries(self, boundaries):
+        for p, boundary_p in boundaries.iteritems():
+            for direction, boundary in boundary_p.iteritems():
+                if boundary["type"] == 'dirichlet':
+                    #Computing the BC give fn
+                    sub_dict = {arg: self.boundaries[arg][direction] for arg in boundary['args']}
+                    self.boundaries[p][direction] = boundary['val'](sub_dict)
+                    
+                    #Setting BC for elements
+                    for element, boundary_val in zip(edge(self.elements,direction),
+                                                split(direction,self.boundaries[p][direction],self.nx,self.ny)):
+                        element.setNeighborBoundary(p,typ=direction, val= boundary_val)
 
 
     def copy_property_to_elements(self, p):
@@ -112,10 +101,13 @@ class system(object):
         self.lobatto_mesh = np.meshgrid(self.x_nodes, self.y_nodes)
     
     def generate_matrices(self, exact=True):
-        self.M      = matrix_generator.massMatrix_2D(self.x_nodes, self.y_nodes, self.x_weights, self.y_weights, exact)
+        self.M      = matrix_generator.massMatrix_2D(self.x_nodes, self.y_nodes, 
+                self.x_weights, self.y_weights, exact)
         self.M_inv  = np.linalg.inv(self.M)
-        self.Dx, self.Dy   = matrix_generator.derMatrix_2D(self.x_nodes, self.y_nodes, self.x_weights, self.y_weights, exact)
-        self.Fx, self.Fy   = matrix_generator.fluxMatrix(self.x_nodes, self.y_nodes, self.x_weights, self.y_weights, exact)
+        self.Dx, self.Dy   = matrix_generator.derMatrix_2D(self.x_nodes, self.y_nodes, 
+                self.x_weights, self.y_weights, exact)
+        self.Fx, self.Fy   = matrix_generator.fluxMatrix(self.x_nodes, self.y_nodes, 
+                self.x_weights, self.y_weights, exact)
 
     def set_property(self,prop,func=None,val=None):
         if func is not None:
