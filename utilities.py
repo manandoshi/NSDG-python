@@ -13,6 +13,7 @@ def opp(direction):
     else:
         assert False
 
+
 def edge(elements, direction):
     if direction == 'N':
         return elements[-1][:]
@@ -22,6 +23,7 @@ def edge(elements, direction):
         return [element[-1] for element in elements]
     if direction == 'W':
         return [element[0] for element in elements]
+
 
 def split(direction, array, num_splits_x, num_splits_y):
     if direction == 'N' or direction == 'S':

@@ -10,6 +10,7 @@ def opp(direction):
     else:
         assert False
 
+
 def edge(elements, direction):
     if direction == 'N':
         return elements[-1][:]
