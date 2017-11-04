@@ -12,12 +12,18 @@ class convectiveSolver(object):
         for p in ["u","v","T"]:
             self.system.add_property(p, func=init[p]["val"], arg_params=init[p]["args"])
 
-        self.system.set_boundaries(boundaries)
+        self.system.set_boundaries_multivar(boundaries)
 
 
-        #self.system.add_property("uT", func=self.product, arg_params=["u", "T"])
-        #self.system.add_property("vT", func=self.product, arg_params=["v", "T"])
-
+        self.system.add_property("uT", func=self.product, arg_params=["u", "T"])
+        self.system.add_property("vT", func=self.product, arg_params=["v", "T"])
+        
+        boundaries = {}
+        for var in ['uT','vT']:
+            boundaries[var] = {}
+            for direction in ['N','E','W','S']:
+                boundaries[var][direction] = {'type':'dirichlet','val':self.product, 'args':list(var)}
+        self.system.set_boundaries_multivar(boundaries)
         #self.system.setBoundary("uT", func=self.product, arg_params=["u","T"], typs=["N","E","W","S"])
         #self.system.setBoundary("vT", func=self.product, arg_params=["v","T"], typs=["N","E","W","S"])
 
@@ -27,4 +33,7 @@ class convectiveSolver(object):
         for key in args:
             product = product*args[key]
         return product
+
+    def solve(self, t, dt):
+        pass
 

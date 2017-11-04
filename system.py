@@ -64,9 +64,12 @@ class system(object):
                     self.elements[j][i].setNeighbor(typ='N', element=self.elements[j+1][i])
                     self.elements[j+1][i].setNeighbor(typ='S', element=self.elements[j][i])
 
-    def add_property(self, p, func, arg_params, copy_to_elements=True):
+    def add_property(self, p, func=None, arg_params=[], copy_to_elements=True):
         sub_dict = {arg_param: self.properties[arg_param] for arg_param in arg_params}
-        self.properties[p] = func(sub_dict)
+        if func is None:
+            self.properties[p] = np.zeros_like(self.properties["x"])
+        else:
+            self.properties[p] = func(sub_dict)
         self.boundaries[p] = {}
         if copy_to_elements:
             self.copy_property_to_elements(p)
@@ -75,19 +78,24 @@ class system(object):
             for j in xrange(self.ny):
                 self.elements[j][i].setNeighborBoundary(p)
 
-    def set_boundaries(self, boundaries):
+    def set_boundaries_multivar(self, boundaries):
         for p, boundary_p in boundaries.iteritems():
-            for direction, boundary in boundary_p.iteritems():
-                if boundary["type"] == 'dirichlet':
-                    #Computing the BC give fn
-                    sub_dict = {arg: self.boundaries[arg][direction] for arg in boundary['args']}
-                    self.boundaries[p][direction] = boundary['val'](sub_dict)
-                    
-                    #Setting BC for elements
-                    for element, boundary_val in zip(edge(self.elements,direction),
-                                                split(direction,self.boundaries[p][direction],self.nx,self.ny)):
-                        element.setNeighborBoundary(p,typ=direction, val= boundary_val)
+            self.set_boundaries(p, boundary_p)
 
+    def set_boundaries(self,p, boundaries):
+        for direction, boundary in boundaries.iteritems():
+            self.set_boundary(p,direction,boundary)
+
+    def set_boundary(self,p, direction, boundary):
+        if boundary["type"] == 'dirichlet':
+            #Computing the BC give fn
+            sub_dict = {arg: self.boundaries[arg][direction] for arg in boundary['args']}
+            self.boundaries[p][direction] = boundary['val'](sub_dict)
+            
+            #Setting BC for elements
+            for element, boundary_val in zip(edge(self.elements,direction),
+                                        split(direction,self.boundaries[p][direction],self.nx,self.ny)):
+                element.setNeighborBoundary(p,typ=direction, val= boundary_val)
 
     def copy_property_to_elements(self, p):
         for i in xrange(self.nx):
@@ -112,3 +120,10 @@ class system(object):
     def set_property(self,prop,func=None,val=None):
         if func is not None:
             self.properties[prop] = func(self.properties["x"], self.properties["y"])
+
+    def ddx(self, outVar, var, fluxType="rusanov", fluxVar="u"):
+        self.add_property(outVar)
+        for j in xrange(self.ny):
+            for i in xrange(self.nx):
+                self.elements[j][i].ddx(outVar, var, fluxType,fluxVar, self.Dx, self.Fx)
+                
