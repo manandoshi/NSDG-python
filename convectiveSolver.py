@@ -6,12 +6,13 @@ class convectiveSolver(object):
     def __init__(self,
                  xmin=-1.0, xmax=1.0, nx=3, mx=4,
                  ymin=-1.0, ymax=1.0, ny=3, my=4,
-                 boundaries=None, init=None, k=0.1,
+                 boundaries=None, init=None, 
+                 alpha=0.1, nu=0.1,
                  Th=10, dt=0.1):
 
         self.system = system(xmin, xmax, ymin, ymax, nx, ny, mx, my, True)
-        self.k = k
         self.dt, self.Th = dt, Th
+        self.k = {'T':alpha, 'u':nu, 'v':nu }
 
         for p in ["u", "v", "T"]:
             self.system.add_property(
@@ -38,23 +39,63 @@ class convectiveSolver(object):
             product = product * args[key]
         return product
     
-    def diffusion(args):
-        Tx, Ty = args['d2Tdx2'], args['d2Tdy2']
-        return -1*self.k*(Tx+Ty)
+    def advectionDiffusion(self,args,p):
+        return self.diffusion(args,p) - self.advection(args,p)
 
-    def euler_step(args, dt):
-        d = args['dTdt']
+    def diffusion(self, args, p):
+        px, py = args['d2'+p+'dx2'], args['d2'+p+'dy2']
+        return self.k[p]*(px+py)
+
+    def advection(self, args, p):
+        px, py = args['du'+p+'dx'],args['dv'+p+'dy']
+        return px+py
+
+    def euler_step(self, args):
+        d = args['dpdt']
         t = args['T']
+        return t + d*self.dt
 
+    def compute_terms(self, p):
+        #Advection terms
+        self.system.add_property('u'+p, func=self.product, arg_params=['u',p])
+        self.system.add_property('v'+p, func=self.product, arg_params=['v',p])
+        boundaries = {}
+        for var in ['u'+p, 'v'+p]:
+            boundaries[var] = {}
+            for direction in ['N', 'E', 'W', 'S']:
+                boundaries[var][direction] = {
+                    'type': 'dirichlet', 'val': self.product, 'args': list(var)}
+        self.system.set_boundaries_multivar(boundaries)
+        self.system.ddx('du'+p+'dx','u'+p)
+        self.system.ddy('dv'+p+'dy','v'+p)
 
-    def solve(self, t, dt):
-        for step in int(t/dt):
-            self.s.ddx('dTdx','T')
-            self.s.ddy('dTdy','T')
+        #Diffussion terms
+        self.system.ddx('d'+p+'dx',p)
+        self.system.ddy('d'+p+'dy',p)
+        
+        self.system.ddx('d2'+p+'dx2','d'+p+'dx')
+        self.system.ddy('d2'+p+'dy2','d'+p+'dy')
 
-            self.s.ddx('d2Tdx2','dTdx')
-            self.s.ddy('d2Tdy2','dTdy')
+        self.system.add_property('d'+p+'dt', func=lambda args:self.advectionDiffusion(args, p), arg_params=['d2'+p+'dx2', 'd2'+p+'dy2','du'+p+'dx','dv'+p+'dy'])
 
-            self.s.add_property('dTdt')
+    def RK2_step(self):
+        #step1
+        self.compute_terms('T')
+        dTdt   = self.system.properties['dTdt']
+        T      = self.system.properties['T']
+        T_temp = T.copy()
+        T[:]   = T + 0.5*self.dt*dTdt
 
+        self.compute_terms('T')
+        dTdt   = self.system.properties['dTdt']
+        T[:]   = T_temp + self.dt*dTdt
+
+        del T_temp
+        
+    def solve(self, Th=10.0, dt=0.10):
+        
+        self.Th = Th
+        self.dt = dt
+        for step in xrange(int(Th/dt)):
+            self.RK2_step()
         pass

@@ -29,8 +29,8 @@ class element(object):
 
     def add_property(self, p, val):
         self.properties[p] = val
-        self.neighbor_boundaries[p] = {}
         self.set_self_boundary(p)
+        self.neighbor_boundaries[p] = self.boundaries[p].copy()
 
     def set_self_boundary(self, p):
         prop = self.properties[p]
@@ -62,20 +62,40 @@ class element(object):
     def ddx(self, outVar, var, fluxType, fluxVar, Dx, Fx):
         prop = self.properties[var]
         outProp = self.properties[outVar]
-        outProp[:] = Dx.dot(var.ravel()).reshape(outProp.shape)
+        outProp[:] = Dx.dot(prop.ravel()).reshape(outProp.shape)
+        self.set_self_boundary(outVar)
 
-        self.set_self_boundary(outProp)
+        if fluxType == "centered":
+            self.boundaries[outVar]['W'][:] += Fx.dot(0.5 * (self.boundaries[var]['W']
+                                                             + self.neighbor_boundaries[var]['W']))
 
-        if flux == "centered":
-            self.boundaries[outProp]['W'][:] = -1 * self.system.Fx.dot(0.5 * (self.boundaries[prop]['W']
-                                                                              + self.neighbor_boundaries['W']))
+            self.boundaries[outVar]['E'][:] += -1*Fx.dot(0.5 * (self.boundaries[var]['E']
+                                                         + self.neighbor_boundaries[var]['E']))
+        elif fluxType == "rusanov":
+            mask = (self.properties[fluxVar] > 0)
+            self.boundaries[outVar]['W'][:] += -1*Fx.dot(0.5 * (self.boundaries[var]['W']
+                                                             + self.neighbor_boundaries[var]['W']))
 
-            self.boundaries[outProp]['E'][:] = self.system.Fx.dot(0.5 * (self.boundaries[prop]['E']
-                                                                         + self.neighbor_boundaries['E']))
-            # self.setNeighborBoundary(p)
-        elif flux == "rusanov":
-            self.boundaries[outProp]['W'][:] = -1 * self.system.Fx.dot(0.5 * (self.boundaries[prop]['W']
-                                                                              + self.neighbor_boundaries['W']))
+            self.boundaries[outVar]['E'][:] +=    Fx.dot(0.5 * (self.boundaries[var]['E']
+                                                         + self.neighbor_boundaries[var]['E']))
 
-            self.boundaries[outProp]['E'][:] = self.system.Fx.dot(0.5 * (self.boundaries[prop]['E']
-                                                                         + self.neighbor_boundaries['E']))
+        outProp[:] = -1*self.system.M_inv.dot(outProp.ravel()).reshape(outProp.shape)
+
+    def ddy(self, outVar, var, fluxType, fluxVar, Dy, Fy):
+#        import pdb; pdb.set_trace()
+        prop        = self.properties[var]
+        outProp     = self.properties[outVar]
+        outProp[:]  = Dy.dot(prop.ravel()).reshape(outProp.shape)
+
+        self.set_self_boundary(outVar)
+
+        if fluxType == "centered":
+            self.boundaries[outVar]['S'][:] += Fy.dot(0.5 * (self.boundaries[var]['S']
+                                                             + self.neighbor_boundaries[var]['S']))
+
+            self.boundaries[outVar]['N'][:] += -1*Fy.dot(0.5 * (self.boundaries[var]['N']
+                                                         + self.neighbor_boundaries[var]['N']))
+        elif fluxType == "rusanov":
+            pass
+
+        outProp[:] = -1*self.system.M_inv.dot(outProp.ravel()).reshape(outProp.shape)

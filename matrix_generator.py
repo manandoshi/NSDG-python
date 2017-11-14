@@ -62,4 +62,4 @@ def derMatrix_2D(nodes_x, nodes_y, weights_x, weights_y, exact=True):
 
 
 def fluxMatrix(nodes_x, nodes_y, weights_x, weights_y, exact=True):
-    return massMatrix(nodes_x, weights_x, exact), massMatrix(nodes_y, weights_y, exact)
+    return massMatrix(nodes_y, weights_y, exact), massMatrix(nodes_x, weights_x, exact)
