@@ -75,13 +75,26 @@ class system(object):
             self.properties[p] = np.zeros_like(self.properties["x"])
         else:
             self.properties[p] = func(sub_dict)
-        self.boundaries[p] = {}
+
+        prop = self.properties[p]
+        self.boundaries[p] = {'N': prop[-1, :],
+                              'S': prop[0 , :],
+                              'W': prop[: , 0],
+                              'E': prop[: ,-1]}
         if copy_to_elements:
             self.copy_property_to_elements(p)
 
         for i in xrange(self.nx):
             for j in xrange(self.ny):
                 self.elements[j][i].setNeighborBoundary(p)
+
+    def update_property(self, p, func=None, arg_params=[]):
+        sub_dict = {arg_param: self.properties[arg_param]
+                    for arg_param in arg_params}
+        if func is None:
+            self.properties[p][:] = np.zeros_like(self.properties["x"])
+        else:
+            self.properties[p][:] = func(sub_dict)
 
     def set_boundaries_multivar(self, boundaries):
         for p, boundary_p in boundaries.iteritems():
@@ -103,6 +116,12 @@ class system(object):
                                              split(direction, self.boundaries[p][direction], self.nx, self.ny)):
                 element.setNeighborBoundary(p, typ=direction, val=boundary_val)
 
+        if boundary["type"] == 'periodic':
+            for element_dir, element_opp in zip(edge(self.elements, direction),
+                    edge(self.elements,opp(direction))):
+                element_dir.setNeighborBoundary(p, typ=direction,
+                        val=element_opp.boundaries[p][opp(direction)])
+
     def copy_property_to_elements(self, p):
         for i in xrange(self.nx):
             for j in xrange(self.ny):
@@ -116,22 +135,33 @@ class system(object):
         self.lobatto_mesh = np.meshgrid(self.x_nodes, self.y_nodes)
 
     def generate_matrices(self, exact=True):
-        self.M = matrix_generator.massMatrix_2D(self.x_nodes, self.y_nodes,
+        self.M = self.dx*self.dy*0.25*matrix_generator.massMatrix_2D(self.x_nodes, self.y_nodes,
                                                 self.x_weights, self.y_weights, exact)
         self.M_inv = np.linalg.inv(self.M)
         self.Dx, self.Dy = matrix_generator.derMatrix_2D(self.x_nodes, self.y_nodes,
                                                          self.x_weights, self.y_weights, exact)
-        self.Fx, self.Fy = matrix_generator.fluxMatrix(self.x_nodes, self.y_nodes,
+        self.Dx = self.Dx*self.dy/2
+        self.Dy = self.Dy*self.dx/2
+        self.Fy, self.Fx = matrix_generator.fluxMatrix(self.x_nodes, self.y_nodes,
                                                        self.x_weights, self.y_weights, exact)
 
+        self.Fx = self.Fx*self.dy/2
+        self.Fy = self.Fy*self.dx/2
     def set_property(self, prop, func=None, val=None):
         if func is not None:
             self.properties[prop] = func(
                 self.properties["x"], self.properties["y"])
 
-    def ddx(self, outVar, var, fluxType="rusanov", fluxVar="u"):
+    def ddx(self, outVar, var, fluxType="centered", fluxVar="u"):
         self.add_property(outVar)
         for j in xrange(self.ny):
             for i in xrange(self.nx):
                 self.elements[j][i].ddx(
                     outVar, var, fluxType, fluxVar, self.Dx, self.Fx)
+
+    def ddy(self, outVar, var, fluxType="centered", fluxVar="v"):
+        self.add_property(outVar)
+        for j in xrange(self.ny):
+            for i in xrange(self.nx):
+                self.elements[j][i].ddy(
+                    outVar, var, fluxType, fluxVar, self.Dy, self.Fy)
