@@ -12,7 +12,7 @@ class system(object):
                  ymin=-1.0, ymax=1.0,
                  num_el_x=3, num_el_y=3,
                  order_x=10, order_y=10,
-                 exact=True):
+                 exact=True, num_sample=20):
 
         self.xmin, self.xmax = xmin, xmax
         self.ymin, self.ymax = ymin, ymax

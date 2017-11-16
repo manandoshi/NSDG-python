@@ -8,9 +8,9 @@ class convectiveSolver(object):
                  ymin=-1.0, ymax=1.0, ny=3, my=4,
                  boundaries=None, init=None, 
                  alpha=0.1, nu=0.1,
-                 Th=10, dt=0.1):
+                 Th=10, dt=0.1, exact=True):
 
-        self.system = system(xmin, xmax, ymin, ymax, nx, ny, mx, my, True)
+        self.system = system(xmin, xmax, ymin, ymax, nx, ny, mx, my, exact=exact)
         self.dt, self.Th = dt, Th
         self.k = {'T':alpha, 'u':nu, 'v':nu }
 
