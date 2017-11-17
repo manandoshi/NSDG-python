@@ -1,0 +1,577 @@
+
+% Default to the notebook output style
+
+    
+
+
+% Inherit from the specified cell style.
+
+
+
+
+    
+\documentclass[11pt]{article}
+
+    
+    
+    \usepackage[T1]{fontenc}
+    % Nicer default font (+ math font) than Computer Modern for most use cases
+    \usepackage{mathpazo}
+
+    % Basic figure setup, for now with no caption control since it's done
+    % automatically by Pandoc (which extracts ![](path) syntax from Markdown).
+    \usepackage{graphicx}
+    % We will generate all images so they have a width \maxwidth. This means
+    % that they will get their normal width if they fit onto the page, but
+    % are scaled down if they would overflow the margins.
+    \makeatletter
+    \def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth
+    \else\Gin@nat@width\fi}
+    \makeatother
+    \let\Oldincludegraphics\includegraphics
+    % Set max figure width to be 80% of text width, for now hardcoded.
+    \renewcommand{\includegraphics}[1]{\Oldincludegraphics[width=.8\maxwidth]{#1}}
+    % Ensure that by default, figures have no caption (until we provide a
+    % proper Figure object with a Caption API and a way to capture that
+    % in the conversion process - todo).
+    \usepackage{caption}
+    \DeclareCaptionLabelFormat{nolabel}{}
+    \captionsetup{labelformat=nolabel}
+
+    \usepackage{adjustbox} % Used to constrain images to a maximum size 
+    \usepackage{xcolor} % Allow colors to be defined
+    \usepackage{enumerate} % Needed for markdown enumerations to work
+    \usepackage{geometry} % Used to adjust the document margins
+    \usepackage{amsmath} % Equations
+    \usepackage{amssymb} % Equations
+    \usepackage{textcomp} % defines textquotesingle
+    % Hack from http://tex.stackexchange.com/a/47451/13684:
+    \AtBeginDocument{%
+        \def\PYZsq{\textquotesingle}% Upright quotes in Pygmentized code
+    }
+    \usepackage{upquote} % Upright quotes for verbatim code
+    \usepackage{eurosym} % defines \euro
+    \usepackage[mathletters]{ucs} % Extended unicode (utf-8) support
+    \usepackage[utf8x]{inputenc} % Allow utf-8 characters in the tex document
+    \usepackage{fancyvrb} % verbatim replacement that allows latex
+    \usepackage{grffile} % extends the file name processing of package graphics 
+                         % to support a larger range 
+    % The hyperref package gives us a pdf with properly built
+    % internal navigation ('pdf bookmarks' for the table of contents,
+    % internal cross-reference links, web links for URLs, etc.)
+    \usepackage{hyperref}
+    \usepackage{longtable} % longtable support required by pandoc >1.10
+    \usepackage{booktabs}  % table support for pandoc > 1.12.2
+    \usepackage[inline]{enumitem} % IRkernel/repr support (it uses the enumerate* environment)
+    \usepackage[normalem]{ulem} % ulem is needed to support strikethroughs (\sout)
+                                % normalem makes italics be italics, not underlines
+    
+
+    
+    
+    % Colors for the hyperref package
+    \definecolor{urlcolor}{rgb}{0,.145,.698}
+    \definecolor{linkcolor}{rgb}{.71,0.21,0.01}
+    \definecolor{citecolor}{rgb}{.12,.54,.11}
+
+    % ANSI colors
+    \definecolor{ansi-black}{HTML}{3E424D}
+    \definecolor{ansi-black-intense}{HTML}{282C36}
+    \definecolor{ansi-red}{HTML}{E75C58}
+    \definecolor{ansi-red-intense}{HTML}{B22B31}
+    \definecolor{ansi-green}{HTML}{00A250}
+    \definecolor{ansi-green-intense}{HTML}{007427}
+    \definecolor{ansi-yellow}{HTML}{DDB62B}
+    \definecolor{ansi-yellow-intense}{HTML}{B27D12}
+    \definecolor{ansi-blue}{HTML}{208FFB}
+    \definecolor{ansi-blue-intense}{HTML}{0065CA}
+    \definecolor{ansi-magenta}{HTML}{D160C4}
+    \definecolor{ansi-magenta-intense}{HTML}{A03196}
+    \definecolor{ansi-cyan}{HTML}{60C6C8}
+    \definecolor{ansi-cyan-intense}{HTML}{258F8F}
+    \definecolor{ansi-white}{HTML}{C5C1B4}
+    \definecolor{ansi-white-intense}{HTML}{A1A6B2}
+
+    % commands and environments needed by pandoc snippets
+    % extracted from the output of `pandoc -s`
+    \providecommand{\tightlist}{%
+      \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+    \DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+    % Add ',fontsize=\small' for more characters per line
+    \newenvironment{Shaded}{}{}
+    \newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{{#1}}}}
+    \newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.56,0.13,0.00}{{#1}}}
+    \newcommand{\DecValTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+    \newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+    \newcommand{\FloatTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+    \newcommand{\CharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+    \newcommand{\StringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+    \newcommand{\CommentTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textit{{#1}}}}
+    \newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{{#1}}}
+    \newcommand{\AlertTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{{#1}}}}
+    \newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.02,0.16,0.49}{{#1}}}
+    \newcommand{\RegionMarkerTok}[1]{{#1}}
+    \newcommand{\ErrorTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{{#1}}}}
+    \newcommand{\NormalTok}[1]{{#1}}
+    
+    % Additional commands for more recent versions of Pandoc
+    \newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.53,0.00,0.00}{{#1}}}
+    \newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+    \newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+    \newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.73,0.40,0.53}{{#1}}}
+    \newcommand{\ImportTok}[1]{{#1}}
+    \newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.73,0.13,0.13}{\textit{{#1}}}}
+    \newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+    \newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+    \newcommand{\VariableTok}[1]{\textcolor[rgb]{0.10,0.09,0.49}{{#1}}}
+    \newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{{#1}}}}
+    \newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.40,0.40,0.40}{{#1}}}
+    \newcommand{\BuiltInTok}[1]{{#1}}
+    \newcommand{\ExtensionTok}[1]{{#1}}
+    \newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.74,0.48,0.00}{{#1}}}
+    \newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.49,0.56,0.16}{{#1}}}
+    \newcommand{\InformationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+    \newcommand{\WarningTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+    
+    
+    % Define a nice break command that doesn't care if a line doesn't already
+    % exist.
+    \def\br{\hspace*{\fill} \\* }
+    % Math Jax compatability definitions
+    \def\gt{>}
+    \def\lt{<}
+    % Document parameters
+    \title{Solving Incompressible NS using Discontinuous Galerkin Method}
+    
+    
+    
+
+    % Pygments definitions
+    
+\makeatletter
+\def\PY@reset{\let\PY@it=\relax \let\PY@bf=\relax%
+    \let\PY@ul=\relax \let\PY@tc=\relax%
+    \let\PY@bc=\relax \let\PY@ff=\relax}
+\def\PY@tok#1{\csname PY@tok@#1\endcsname}
+\def\PY@toks#1+{\ifx\relax#1\empty\else%
+    \PY@tok{#1}\expandafter\PY@toks\fi}
+\def\PY@do#1{\PY@bc{\PY@tc{\PY@ul{%
+    \PY@it{\PY@bf{\PY@ff{#1}}}}}}}
+\def\PY#1#2{\PY@reset\PY@toks#1+\relax+\PY@do{#2}}
+
+\expandafter\def\csname PY@tok@mf\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@kn\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@gd\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.63,0.00,0.00}{##1}}}
+\expandafter\def\csname PY@tok@ne\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.82,0.25,0.23}{##1}}}
+\expandafter\def\csname PY@tok@mo\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@sd\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@nb\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@err\endcsname{\def\PY@bc##1{\setlength{\fboxsep}{0pt}\fcolorbox[rgb]{1.00,0.00,0.00}{1,1,1}{\strut ##1}}}
+\expandafter\def\csname PY@tok@s1\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@gs\endcsname{\let\PY@bf=\textbf}
+\expandafter\def\csname PY@tok@nn\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@c\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@k\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@ge\endcsname{\let\PY@it=\textit}
+\expandafter\def\csname PY@tok@kt\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.69,0.00,0.25}{##1}}}
+\expandafter\def\csname PY@tok@gi\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.63,0.00}{##1}}}
+\expandafter\def\csname PY@tok@kd\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@nt\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@ow\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.67,0.13,1.00}{##1}}}
+\expandafter\def\csname PY@tok@nd\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.67,0.13,1.00}{##1}}}
+\expandafter\def\csname PY@tok@cp\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.74,0.48,0.00}{##1}}}
+\expandafter\def\csname PY@tok@ss\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@gh\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,0.50}{##1}}}
+\expandafter\def\csname PY@tok@gu\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.50,0.00,0.50}{##1}}}
+\expandafter\def\csname PY@tok@gt\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.27,0.87}{##1}}}
+\expandafter\def\csname PY@tok@w\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.73,0.73}{##1}}}
+\expandafter\def\csname PY@tok@s2\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@sc\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@kr\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@nf\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@sr\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.53}{##1}}}
+\expandafter\def\csname PY@tok@go\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.53,0.53,0.53}{##1}}}
+\expandafter\def\csname PY@tok@nl\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.63,0.63,0.00}{##1}}}
+\expandafter\def\csname PY@tok@m\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@s\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@se\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.13}{##1}}}
+\expandafter\def\csname PY@tok@vm\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@vg\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@no\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.53,0.00,0.00}{##1}}}
+\expandafter\def\csname PY@tok@vc\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@vi\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@gr\endcsname{\def\PY@tc##1{\textcolor[rgb]{1.00,0.00,0.00}{##1}}}
+\expandafter\def\csname PY@tok@mh\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@mb\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@il\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@na\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.49,0.56,0.16}{##1}}}
+\expandafter\def\csname PY@tok@sx\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@sa\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@c1\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@nv\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@kp\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@o\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@fm\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@sb\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@nc\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@ch\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@gp\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,0.50}{##1}}}
+\expandafter\def\csname PY@tok@kc\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@ni\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.60,0.60,0.60}{##1}}}
+\expandafter\def\csname PY@tok@dl\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@cpf\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@mi\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@cs\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@cm\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@sh\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@bp\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@si\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.53}{##1}}}
+
+\def\PYZbs{\char`\\}
+\def\PYZus{\char`\_}
+\def\PYZob{\char`\{}
+\def\PYZcb{\char`\}}
+\def\PYZca{\char`\^}
+\def\PYZam{\char`\&}
+\def\PYZlt{\char`\<}
+\def\PYZgt{\char`\>}
+\def\PYZsh{\char`\#}
+\def\PYZpc{\char`\%}
+\def\PYZdl{\char`\$}
+\def\PYZhy{\char`\-}
+\def\PYZsq{\char`\'}
+\def\PYZdq{\char`\"}
+\def\PYZti{\char`\~}
+% for compatibility with earlier versions
+\def\PYZat{@}
+\def\PYZlb{[}
+\def\PYZrb{]}
+\makeatother
+
+
+    % Exact colors from NB
+    \definecolor{incolor}{rgb}{0.0, 0.0, 0.5}
+    \definecolor{outcolor}{rgb}{0.545, 0.0, 0.0}
+
+
+
+    
+    % Prevent overflowing lines due to hard-to-break entities
+    \sloppy 
+    % Setup hyperref package
+    \hypersetup{
+      breaklinks=true,  % so long urls are correctly broken across lines
+      colorlinks=true,
+      urlcolor=urlcolor,
+      linkcolor=linkcolor,
+      citecolor=citecolor,
+      }
+    % Slightly bigger margins than the latex defaults
+    
+    \geometry{verbose,tmargin=1in,bmargin=1in,lmargin=1in,rmargin=1in}
+    
+    
+
+    \begin{document}
+    
+    
+    \maketitle
+    
+    
+
+    
+
+    \section{Background}\label{background}
+
+\subsection{Lagrange interpolation}\label{lagrange-interpolation}
+
+Langrangian interpolation is used very heavily in Galerkin methods and
+it is worthwile to go through the theory. Lagrangian interpolation is
+essentially interpolating a function using an \(N\)-degree polynomial
+such that it exactly satisfies the function at \(N+1\) points.
+
+\subsubsection{1D Lagrange
+interpolation}\label{d-lagrange-interpolation}
+
+Let \(f(x)\) be the function we wish to interpolate. Let \(f^N(X)\) be
+its order \(N\) interpolationg polynomial which perfectly satisfies
+\(f(x)\) on the points \(x_0, x_1, x_2, ... x_n\)
+
+We define the order \(N\) Langrangian at point \(x_i\) as
+\[L^N_i(x) = \prod_{j=0, j\neq i}^{N} \frac{x-x_j}{x_j-x_i}\]
+
+It can easily be shown that \[L^N_i(x_j) = \delta_{i}\]
+
+The interpolating function can then be written as
+\[f^N(x) = \sum_{i=0}^{N}L_i^N(x)f(x_i)\] Note: * \(f^n(x_i) = f(x_i)\)
+* Order of \(L_i^N(x)\) is \(N\)
+
+
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{Solving Incompressible NS using Discontinuous Galerkin Method_files/Solving Incompressible NS using Discontinuous Galerkin Method_3_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \paragraph{2D Lagrange interpolation}\label{d-lagrange-interpolation}
+
+2D Lagrange interpolation on a rectangular grid is extremely simple.
+
+Let the interpoliating polynomial to the function \(f(x,y)\) be
+\(f^{NM}(x,y)\) which satisfies the function of a grid of points formed
+by \(x_0, x_1, ... x_N\) and \(y_0, y_1, ... y_M\)
+
+\[L_{ij}^{NM}(x,y) = L_i^{N}(x_i) L_j^{M}(y_j)\]
+\[f^{MN}(x,y) = \sum_{i=0}^{N} \sum_{j=0}^{M} L_{ij}^{NM}(x,y) f(x_i,y_j)\]
+
+    Following are the various basis functions for 4*4 equispaced and lobatto
+nodes
+
+
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{Solving Incompressible NS using Discontinuous Galerkin Method_files/Solving Incompressible NS using Discontinuous Galerkin Method_7_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{Solving Incompressible NS using Discontinuous Galerkin Method_files/Solving Incompressible NS using Discontinuous Galerkin Method_7_1.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{Solving Incompressible NS using Discontinuous Galerkin Method_files/Solving Incompressible NS using Discontinuous Galerkin Method_9_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \subsection{Differentiation}\label{differentiation}
+
+\subsubsection{1D}\label{d}
+
+Differentiation an interpolated function is extremely simple.
+\[f^{'N}(x) = \sum_{i=0}^{N}L_i^{'N}(x)f(x_i)\]
+
+\subsubsection{2D}\label{d-1}
+
+Derivatives in 2D work the same way as in 1D
+
+\[\frac{\partial f^{MN}(x,y)}{\partial x} = \sum_{i=0}^{N} \sum_{j=0}^{M} L_i^{'N}(x_i) * L_j^{M}(y_j) f(x_i,y_j)\]
+\[\frac{\partial f^{MN}(x,y)}{\partial y} = \sum_{i=0}^{N} \sum_{j=0}^{M} L_i^{N}(x_i) * L_j^{'M}(y_j) f(x_i,y_j)\]
+
+    \subsection{Integration}\label{integration}
+
+We integrate our functions using gaussian quadrature technique. The
+integral is converted into a summation over a fixed number of points.
+
+\[\int f(x) dx = \sum w(i)f(x_i)\]
+
+The points that are used for the quadrature can be optimised to give
+higher accuracy. For instance, choosing the Gauss-Legendre points would
+let you integrate perfectly over a polynomial of order \(2N-1\) where
+\(N\) is the number of points used in the quadrature. Gauss-Lobatto
+points integrate perfectly over a polynomial of order \(2N-3\), but have
+the added advantage of having the edge points as nodes.
+
+When using the galerkin method, we will be chosing certain nodes to
+interpolate a function. The values of the function at these points will
+thus be trivially known. It thus makes sense to choose the interpolating
+nodes to be the same as the nodes used for integration. We thus use the
+Lobatto points for both, interpolation and integration. We need to
+accurately now the values of a function at boundaries because this will
+be used heavily when calculating fluxes. Moreover, as seen above, the
+basis functions behave well when lobatto points are chosen instead of
+equispaced points.
+
+    \section{Introduction to Galerkin
+methods}\label{introduction-to-galerkin-methods}
+
+The core idea of galerkin methods is to take the inner product of the
+known function space with the governing equation. We thus project the
+governing equation on our function space. For simplicity consider a just
+one "element". The function space we use will be the space defined the
+basis functions \(L^{NM}_{ij}(x,y)\). This essentially means that our
+function space is all functions of the for \(f(x)g(y)\) where \(f\) and
+\(g\) is an order \(N\) and \(M\) polynomials respectively. Let our
+governing equation be \[\frac{\partial q}{\partial t} = f(q)\]
+
+Inner product in the function space is defined as
+\[<f,g> = \int_{\Omega} fg d\Omega\]
+
+Taking the inner proguct of the governing equation with the function
+space, we get:
+
+\[\int_{\Omega}\Psi \frac{\partial q^N}{\partial t}d\Omega = \int_{\Omega}\Psi f(q) d\Omega\]
+where \(q^N\) is the discretization of \(q\) on out function space.
+\[q^N = \sum_j \psi_j q_j\]
+
+Now, the above relation has to hold for every basis function \(\psi_i\)
+int the function space.
+
+Thus,
+\[\int_{\Omega}\psi_i \sum_j \psi_j \frac{\partial q_j^N}{\partial t}d\Omega = \int_{\Omega}\Psi f(q) d\Omega\]
+
+Taking the summation out of the integral and taking
+\(\frac{\partial q_j^N}{\partial t}\) out,
+\[ \sum_j (\int_{\Omega}\psi_i \psi_j d\Omega) \frac{\partial q_j^N}{\partial t} = \int_{\Omega}\Psi f(q) d\Omega\]
+
+This can be reduced to the following expression
+\[M \frac{\partial q_j^N}{\partial t} = RHS\]
+
+where M, the "Mass matrix" is defined as
+\[M_{ij} = \int_{\Omega}\psi_i \psi_j d\Omega\]
+
+The integral is calculated using the Quadrature method discussed above.
+If the interpolating nodes were used as the integration nodes, it would
+result in an inexact integration since if the number of points is \(N\)
+and the order of the polynomial is \(2(N-1)\). Higher order lobatto
+nodes can be calculated for exact integration. Inexact integration leads
+to the mass matrix being diagonal (easy to check). This reduces the cost
+of inverting it. However, this computation has to be done just once for
+the entire simulation.
+
+The treatment of the RHS depends on what term it is
+
+\subsection{Continuous vs. Discontinuous
+methods}\label{continuous-vs.-discontinuous-methods}
+
+If we are to have a multi-cell system, we can go about it two ways:
+
+\subsubsection{Continuous Galerkin}\label{continuous-galerkin}
+
+In CG methods, the common boundary of neighboring cells is shared. This
+essentially means that all our stored variables will be continuous
+functions. Our function-space will be a continuous function that is a
+collection of polynomials in every cell.
+
+The problem with this method is that the final matrix vector problem we
+get will be coupled. This is because the common boundary will occur in
+the equation of two different cells. Thus, to solve this system, we will
+need to construct giant matrices for the entire system. We'll have to
+carry out matrix-vector computations with these large matrices every
+timestep
+
+\subsubsection{Discontinuous Galerkin}\label{discontinuous-galerkin}
+
+An alternative to that is the DG method. The boundaries of each cell are
+independant of the neighbours. This allows us to do our computations for
+each cell independently. Information flows between cells because of the
+flux term (which will be shown in the later formulation). This term,
+which would have gone zero everywhere but the system boundary for CG is
+now non zero at the edges of the DG cell. The boundaries of the
+neighbors will be used when computing the flux term.
+
+One huge advantage of DG methods is the ability to run in parallel. The
+method scales up beautifully with increasing number of computing nodes.
+Every node can be assigned a set of elements that it has to bother
+about. Internode communication will be limited to exchanging the
+boundary values. Every node can then just perform the matrix-vector
+computations on its own set of cells
+
+\subsection{Difussion}\label{difussion}
+
+Governing equation:
+\(\frac{\partial T}{\partial t} = \alpha \nabla^2 T\)
+
+We break this into two equations: \[\Theta = \nabla T \\
+\frac{\partial T}{\partial t} = \alpha \nabla \cdot \Theta\]
+
+We first solve for \(\Theta\)
+\[ \theta_x = \frac{\partial T}{\partial x} \\ \theta_y = \frac{\partial T}{\partial y}\]
+
+Proceeding as earlier,
+
+\begin{align}
+ M\Theta^N &= \int_{\Omega}\Psi \nabla T d\Omega \\
+ M_i\Theta^N &= \int_{\Omega}\psi_i \nabla  (\sum_j \psi_j T_j) d\Omega \\
+ M_i\Theta^N &=  \sum_j \int_{\Omega}\nabla(\psi_j \psi_i) T_j d\Omega - \sum_j \int_{\Omega}\nabla( \psi_i )\psi_j T_j d\Omega\\
+ M_i\Theta^N &= \sum_j ([\psi_i \psi_j]_{\Gamma} T_j - \int_{\Omega}\psi_j\nabla\psi_i T_j d\Omega)\\
+\end{align}
+
+The first term will be evaluated at the boundaries. This can be
+rewritten as matrix vector equation:
+
+\[M\Theta^N = FT - DT\]
+
+Where F and T are the flux and derivative matrices respectively. F is 0
+for points not corresponding to the boundary.
+\[F_{ij} = [\psi_i \psi_j]_{\Gamma}\] \[D_{ij} = \psi_j\nabla\psi_i\]
+
+Solving the second part:
+
+\begin{align}
+\frac{\partial T}{\partial t} &= \alpha \nabla \cdot \Theta\\
+\int_\Omega \Psi \frac{\partial T}{\partial t} d\Omega &= \alpha \int_\Omega \Psi \nabla \cdot \Theta d\Omega\\
+M_i\frac{\partial T_j}{\partial t} &= \sum_j ([\psi_i \psi_j]_{\Gamma} \Theta_j - \int_{\Omega}\psi_j\nabla\psi_i T_j d\Omega)\\
+\end{align}
+
+
+    \subsubsection{Example: Temperature distrigution on a 2D conducting
+plate with dirichlet
+boundaries}\label{example-temperature-distrigution-on-a-2d-conducting-plate-with-dirichlet-boundaries}
+
+The right wall is maintained at \(T = 1\) and all the other walls are
+maintained at \(T = 0\). The thermal conductivity (\(\alpha\)) is set at
+0.1. The time step for all of the simulations is 0.1ms and the time
+horizon is 2sec. The solution is compared to the 2D steady state
+temperature distribution that can be computed analytically. The order in
+X and Y is varied and the errors are plotted. The first set of plots are
+generated using inexact integration and the second set using exact. You
+can see that the difference in errors is fairly small.
+
+Note: This is a spectral method. There is only one cell.
+
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{Solving Incompressible NS using Discontinuous Galerkin Method_files/Solving Incompressible NS using Discontinuous Galerkin Method_15_1.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{Solving Incompressible NS using Discontinuous Galerkin Method_files/Solving Incompressible NS using Discontinuous Galerkin Method_16_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    Breaking up the domain into multiple cells is beneficial since it
+reduces the size of the matrices/increases the number of sampling
+points. However, higher number of cells also means that you'll have to
+repeat the matrix vector operations that many times.
+
+If we were to use a zeroeth order scheme, it would essentially be like a
+finite volume scheme where every cell has a single value.
+
+We will now run the same exaple but will vary the number of elements too
+keeping the total number of nodes constant to observe how the error
+varies. We will just be using inexact integration for this one.
+
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{Solving Incompressible NS using Discontinuous Galerkin Method_files/Solving Incompressible NS using Discontinuous Galerkin Method_18_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \subsubsection{Example: Diffusion of a Gaussian Temperature
+distribution}\label{example-diffusion-of-a-gaussian-temperature-distribution}
+
+A spectral method works poorly for this problem, perhaps because of very
+low sampling provided by the lobatto points near the center. Note that
+the lower accuracy near the borders is due to the inaccurate boundary
+conditions. The analytical solution is for the boundaries being
+infinitely far away from the gaussian Temperature distribution
+
+
+
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{Solving Incompressible NS using Discontinuous Galerkin Method_files/Solving Incompressible NS using Discontinuous Galerkin Method_22_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+
+    % Add a bibliography block to the postdoc
+    
+    
+    
+    \end{document}

@@ -3,7 +3,7 @@ from directions import opp
 
 
 class element(object):
-    def __init__(self, x, dx, y, dy, properties={}, system=None):
+    def __init__(self, x, dx, y, dy, properties={}, system=None, num_samples_x=2, num_samples_y=2):
         self.x_min = x
         self.y_min = y
         self.x_max = x + dx
@@ -17,11 +17,19 @@ class element(object):
         self.x_comp = self.system.x_nodes
         self.y_comp = self.system.y_nodes
 
+        
+
         self.x_real = self.x_min + (self.x_comp + 1) * dx / 2
         self.y_real = self.y_min + (self.y_comp + 1) * dy / 2
 
         self.properties["x"][:], self.properties["y"][:] = np.meshgrid(
             self.x_real, self.y_real)
+
+        self.x_sample = self.x_min + (self.system.x_sample + 1) * dx / 2
+        self.y_sample = self.y_min + (self.system.y_sample + 1) * dy / 2
+
+        self.properties["x_sample"][:],self.properties["y_sample"][:] = np.meshgrid(
+                self.x_sample, self.y_sample)
 
         self.neighbor = {}
         self.boundaries = {}
@@ -99,3 +107,7 @@ class element(object):
             pass
 
         outProp[:] = -1*self.system.M_inv.dot(outProp.ravel()).reshape(outProp.shape)
+
+    def computeSample(self,p):
+        self.properties[p+'_sample'][:] = \
+        self.system.interp.dot(self.properties[p].ravel()).reshape(self.properties['x_sample'].shape)

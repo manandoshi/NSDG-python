@@ -8,15 +8,16 @@ class convectiveSolver(object):
                  ymin=-1.0, ymax=1.0, ny=3, my=4,
                  boundaries=None, init=None, 
                  alpha=0.1, nu=0.1,
+                 sample_x=30, sample_y=30,
                  Th=10, dt=0.1, exact=True):
 
-        self.system = system(xmin, xmax, ymin, ymax, nx, ny, mx, my, exact=exact)
+        self.system = system(xmin, xmax, ymin, ymax, nx, ny, mx, my, exact=exact, num_samples_x=sample_x, num_samples_y=sample_y)
         self.dt, self.Th = dt, Th
         self.k = {'T':alpha, 'u':nu, 'v':nu }
 
         for p in ["u", "v", "T"]:
             self.system.add_property(
-                p, func=init[p]["val"], arg_params=init[p]["args"])
+                p, func=init[p]["val"], arg_params=init[p]["args"], sample=True)
 
         self.system.set_boundaries_multivar(boundaries)
 
