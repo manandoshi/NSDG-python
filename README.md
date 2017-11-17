@@ -65,5 +65,4 @@ axs[1][0].contourf(x,y,T_init,200);
 c = axs[1][1].contourf(x,y,(T-T_exact),200)
 plt.colorbar(c)
 plt.show()
-
-'''
+```
