@@ -9,11 +9,12 @@ class convectiveSolver(object):
                  boundaries=None, init=None, 
                  alpha=0.1, nu=0.1,
                  sample_x=30, sample_y=30,
-                 Th=10, dt=0.1, exact=True):
+                 Th=10, dt=0.1, exact=True, adv_flux="rusanov"):
 
         self.system = system(xmin, xmax, ymin, ymax, nx, ny, mx, my, exact=exact, num_samples_x=sample_x, num_samples_y=sample_y)
         self.dt, self.Th = dt, Th
         self.k = {'T':alpha, 'u':nu, 'v':nu }
+        self.fluxType = adv_flux
 
         for p in ["u", "v", "T"]:
             self.system.add_property(
@@ -67,8 +68,8 @@ class convectiveSolver(object):
                 boundaries[var][direction] = {
                     'type': 'dirichlet', 'val': self.product, 'args': list(var)}
         self.system.set_boundaries_multivar(boundaries)
-        self.system.ddx('du'+p+'dx','u'+p)
-        self.system.ddy('dv'+p+'dy','v'+p)
+        self.system.ddx('du'+p+'dx','u'+p, fluxType=self.fluxType, fluxVar='u')
+        self.system.ddy('dv'+p+'dy','v'+p, fluxType=self.fluxType, fluxVar='v')
 
         #Diffussion terms
         self.system.ddx('d'+p+'dx',p)

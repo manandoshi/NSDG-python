@@ -80,12 +80,14 @@ class element(object):
             self.boundaries[outVar]['E'][:] += -1*Fx.dot(0.5 * (self.boundaries[var]['E']
                                                          + self.neighbor_boundaries[var]['E']))
         elif fluxType == "rusanov":
-            mask = (self.properties[fluxVar] > 0)
-            self.boundaries[outVar]['W'][:] += -1*Fx.dot(0.5 * (self.boundaries[var]['W']
-                                                             + self.neighbor_boundaries[var]['W']))
+            mask_in = (self.boundaries[fluxVar]['W'] > 0).astype(int)
+            mask_out= (self.boundaries[fluxVar]['E'] > 0).astype(int)
 
-            self.boundaries[outVar]['E'][:] +=    Fx.dot(0.5 * (self.boundaries[var]['E']
-                                                         + self.neighbor_boundaries[var]['E']))
+            self.boundaries[outVar]['W'][:] += Fx.dot((1-mask_in) * (self.boundaries[var]['W'])
+                                                             + self.neighbor_boundaries[var]['W']*mask_in)
+
+            self.boundaries[outVar]['E'][:] += -1*Fx.dot(mask_out * self.boundaries[var]['E']
+                                                         + (1-mask_out)*(self.neighbor_boundaries[var]['E']))
 
         outProp[:] = -1*self.system.M_inv.dot(outProp.ravel()).reshape(outProp.shape)
 
@@ -104,7 +106,14 @@ class element(object):
             self.boundaries[outVar]['N'][:] += -1*Fy.dot(0.5 * (self.boundaries[var]['N']
                                                          + self.neighbor_boundaries[var]['N']))
         elif fluxType == "rusanov":
-            pass
+            mask_in = (self.boundaries[fluxVar]['S'] > 0).astype(int)
+            mask_out= (self.boundaries[fluxVar]['N'] > 0).astype(int)
+
+            self.boundaries[outVar]['S'][:] += Fy.dot((1-mask_in) * (self.boundaries[var]['S'])
+                                                             + self.neighbor_boundaries[var]['S']*mask_in)
+
+            self.boundaries[outVar]['N'][:] += -1*Fy.dot(mask_out * self.boundaries[var]['N']
+                                                         + (1-mask_out)*(self.neighbor_boundaries[var]['N']))
 
         outProp[:] = -1*self.system.M_inv.dot(outProp.ravel()).reshape(outProp.shape)
 
