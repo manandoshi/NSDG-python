@@ -92,7 +92,6 @@ class element(object):
         outProp[:] = -1*self.system.M_inv.dot(outProp.ravel()).reshape(outProp.shape)
 
     def ddy(self, outVar, var, fluxType, fluxVar, Dy, Fy):
-#        import pdb; pdb.set_trace()
         prop        = self.properties[var]
         outProp     = self.properties[outVar]
         outProp[:]  = Dy.dot(prop.ravel()).reshape(outProp.shape)
