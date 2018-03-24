@@ -65,7 +65,7 @@ def fluxMatrix(nodes_x, nodes_y, weights_x, weights_y, exact=True):
     return massMatrix(nodes_y, weights_y, exact), massMatrix(nodes_x, weights_x, exact)
 
 
-def lapInv(nx, ny, mx, my, M, Dx, Dy, Fx, Fy, M_inv):
+def lapMatrix(nx, ny, mx, my, M, Dx, Dy, Fx, Fy, M_inv):
     global_M_inv = np.zeros([nx * mx * ny * my, nx * mx * ny * my])
     global_Dx = np.zeros([nx * mx * ny * my, nx * mx * ny * my])
     global_Dy = np.zeros([nx * mx * ny * my, nx * mx * ny * my])
