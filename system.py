@@ -12,7 +12,7 @@ class system(object):
                  ymin=-1.0, ymax=1.0,
                  num_el_x=3, num_el_y=3,
                  order_x=10, order_y=10,
-                 exact=True, 
+                 exact=True,
                  num_samples_x=20, num_samples_y=20):
 
         self.xmin, self.xmax = xmin, xmax
@@ -20,10 +20,10 @@ class system(object):
         self.nx, self.ny = num_el_x, num_el_y
         self.mx, self.my = order_x, order_y
         self.dx, self.dy = (xmax - xmin) / (self.nx), (ymax - ymin) / (self.ny)
-        self.num_samples_x ,self.num_samples_y = num_samples_x, num_samples_y
+        self.num_samples_x, self.num_samples_y = num_samples_x, num_samples_y
 
-        self.x_sample = np.linspace(-1,1,num_samples_x)
-        self.y_sample = np.linspace(-1,1,num_samples_y)
+        self.x_sample = np.linspace(-1, 1, num_samples_x)
+        self.y_sample = np.linspace(-1, 1, num_samples_y)
 
         self.properties = {}
         self.boundaries = {}
@@ -34,7 +34,7 @@ class system(object):
                                                                  np.zeros([self.ny * self.my]))
 
         self.properties["x_sample"], self.properties["y_sample"] = np.meshgrid(np.zeros([self.nx * self.num_samples_x]),
-                                                                 np.zeros([self.ny * self.num_samples_y]))
+                                                                               np.zeros([self.ny * self.num_samples_y]))
         self.create_elements()
         self.generate_matrices(exact)
 
@@ -55,10 +55,10 @@ class system(object):
                                                  i * self.mx:(i + 1) * self.mx]
 
                 prop["x_sample"] = self.properties["x_sample"][j * self.num_samples_y:(j + 1) * self.num_samples_y,
-                                                 i * self.num_samples_x:(i + 1) * self.num_samples_x]
+                                                               i * self.num_samples_x:(i + 1) * self.num_samples_x]
 
                 prop["y_sample"] = self.properties["y_sample"][j * self.num_samples_y:(j + 1) * self.num_samples_y,
-                                                 i * self.num_samples_x:(i + 1) * self.num_samples_x]
+                                                               i * self.num_samples_x:(i + 1) * self.num_samples_x]
 
                 self.elements[j][i] = element(self.x_elements[j][i], self.dx,
                                               self.y_elements[j][i], self.dy,
@@ -94,12 +94,13 @@ class system(object):
         prop = self.properties[p]
 
         if sample:
-            self.properties[p+'_sample'] = np.zeros_like(self.properties["x_sample"])
+            self.properties[p +
+                            '_sample'] = np.zeros_like(self.properties["x_sample"])
 
         self.boundaries[p] = {'N': prop[-1, :],
-                              'S': prop[0 , :],
-                              'W': prop[: , 0],
-                              'E': prop[: ,-1]}
+                              'S': prop[0, :],
+                              'W': prop[:, 0],
+                              'E': prop[:, -1]}
         if copy_to_elements:
             self.copy_property_to_elements(p, sample)
 
@@ -137,9 +138,9 @@ class system(object):
 
         if boundary["type"] == 'periodic':
             for element_dir, element_opp in zip(edge(self.elements, direction),
-                    edge(self.elements,opp(direction))):
+                                                edge(self.elements, opp(direction))):
                 element_dir.setNeighborBoundary(p, typ=direction,
-                        val=element_opp.boundaries[p][opp(direction)])
+                                                val=element_opp.boundaries[p][opp(direction)])
 
     def copy_property_to_elements(self, p, sample):
         for i in xrange(self.nx):
@@ -150,31 +151,31 @@ class system(object):
         if sample:
             for i in xrange(self.nx):
                 for j in xrange(self.ny):
-                    self.elements[j][i].add_property(p+'_sample', self.properties[p+'_sample'][j * self.num_samples_y:(j + 1) * self.num_samples_y,
-                                                                           i * self.num_samples_x:(i + 1) * self.num_samples_x])
+                    self.elements[j][i].add_property(p + '_sample', self.properties[p + '_sample'][j * self.num_samples_y:(j + 1) * self.num_samples_y,
+                                                                                                   i * self.num_samples_x:(i + 1) * self.num_samples_x])
 
     def generate_nodes(self):
         self.x_nodes, self.x_weights = lobatto.compute_nodes(self.mx)
         self.y_nodes, self.y_weights = lobatto.compute_nodes(self.my)
 
-        self.interp = interpolation.compute_2Dmatrix(self.x_nodes, self.y_nodes, self.x_sample, self.y_sample)
+        self.interp = interpolation.compute_2Dmatrix(
+            self.x_nodes, self.y_nodes, self.x_sample, self.y_sample)
 
         self.lobatto_mesh = np.meshgrid(self.x_nodes, self.y_nodes)
 
-
     def generate_matrices(self, exact=True):
-        self.M = self.dx*self.dy*0.25*matrix_generator.massMatrix_2D(self.x_nodes, self.y_nodes,
-                                                self.x_weights, self.y_weights, exact)
+        self.M = self.dx * self.dy * 0.25 * matrix_generator.massMatrix_2D(self.x_nodes, self.y_nodes,
+                                                                           self.x_weights, self.y_weights, exact)
         self.M_inv = np.linalg.inv(self.M)
         self.Dx, self.Dy = matrix_generator.derMatrix_2D(self.x_nodes, self.y_nodes,
                                                          self.x_weights, self.y_weights, exact)
-        self.Dx = self.Dx*self.dy/2
-        self.Dy = self.Dy*self.dx/2
+        self.Dx = self.Dx * self.dy / 2
+        self.Dy = self.Dy * self.dx / 2
         self.Fy, self.Fx = matrix_generator.fluxMatrix(self.x_nodes, self.y_nodes,
                                                        self.x_weights, self.y_weights, exact)
 
-        self.Fx = self.Fx*self.dy/2
-        self.Fy = self.Fy*self.dx/2
+        self.Fx = self.Fx * self.dy / 2
+        self.Fy = self.Fy * self.dx / 2
 
     def set_property(self, prop, func=None, val=None):
         if func is not None:
@@ -182,21 +183,23 @@ class system(object):
                 self.properties["x"], self.properties["y"])
 
     def ddx(self, outVar, var, fluxType="centered", fluxVar="u"):
-        self.add_property(outVar)
+        if outVar not in self.properties:
+            self.add_property(outVar)
         for j in xrange(self.ny):
             for i in xrange(self.nx):
                 self.elements[j][i].ddx(
                     outVar, var, fluxType, fluxVar, self.Dx, self.Fx)
 
     def ddy(self, outVar, var, fluxType="centered", fluxVar="v"):
-        self.add_property(outVar)
+        if outVar not in self.properties:
+            self.add_property(outVar)
         for j in xrange(self.ny):
             for i in xrange(self.nx):
                 self.elements[j][i].ddy(
                     outVar, var, fluxType, fluxVar, self.Dy, self.Fy)
 
-    def computeSample(self,p):
+    def computeSample(self, p):
         for j in xrange(self.ny):
             for i in xrange(self.nx):
                 self.elements[j][i].computeSample(p)
-        return self.properties[p+'_sample']
+        return self.properties[p + '_sample']
