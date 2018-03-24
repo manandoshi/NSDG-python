@@ -11,11 +11,13 @@ class convectiveSolver(object):
                  sample_x=30, sample_y=30,
                  Th=10, dt=0.1, exact=True, adv_flux="rusanov"):
 
+        #Initializing "system"
         self.system = system(xmin, xmax, ymin, ymax, nx, ny, mx, my, exact=exact, num_samples_x=sample_x, num_samples_y=sample_y)
         self.dt, self.Th = dt, Th
         self.k = {'T':alpha, 'u':nu, 'v':nu }
         self.fluxType = adv_flux
 
+        #Adding main variables to system
         for p in ["u", "v", "T","P"]:
             self.system.add_property(
                 p, func=init[p]["val"], arg_params=init[p]["args"], sample=True)
@@ -24,6 +26,7 @@ class convectiveSolver(object):
 
         boundaries = {}
 
+        #adding derived variables to system
         for var in ['uT', 'vT', 'uu', 'vv']:
             self.system.add_property(
                 var, func=self.product, arg_params=list(var))
@@ -32,7 +35,8 @@ class convectiveSolver(object):
                 boundaries[var][direction] = {
                     'type': 'dirichlet', 'val': self.product, 'args': list(var)}
         self.system.set_boundaries_multivar(boundaries)
-
+    
+    #Utility fn to compute product of two properties
     def product(self, args):
         product = 1.0
         for key in args:
@@ -55,6 +59,7 @@ class convectiveSolver(object):
         t = args['T']
         return t + d*self.dt
 
+    #Function to compute required terms used in advection ad diffussion computation
     def compute_terms(self, p):
         #Advection terms
         self.system.add_property('u'+p, func=self.product, arg_params=['u',p])
@@ -75,7 +80,8 @@ class convectiveSolver(object):
         
         self.system.ddx('d2'+p+'dx2','d'+p+'dx')
         self.system.ddy('d2'+p+'dy2','d'+p+'dy')
-
+        
+        #This shouldn't be here
         self.system.add_property('d'+p+'dt', func=lambda args:self.advectionDiffusion(args, p), arg_params=['d2'+p+'dx2', 'd2'+p+'dy2','du'+p+'dx','dv'+p+'dy'])
 
     def RK2_step(self):
@@ -86,6 +92,7 @@ class convectiveSolver(object):
         T_temp = T.copy()
         T[:]   = T + 0.5*self.dt*dTdt
 
+        #step2
         self.compute_terms('T')
         dTdt   = self.system.properties['dTdt']
         T[:]   = T_temp + self.dt*dTdt
