@@ -177,7 +177,7 @@ class system(object):
         self.Fx = self.Fx * self.dy / 2
         self.Fy = self.Fy * self.dx / 2
 
-        self.lap = matrix_generator.lapMatrix(
+        self.lap, self.global_derx, self.global_dery = matrix_generator.lapMatrix(
             self.nx, self.ny, self.mx, self.my, self.M, self.Dx, self.Dy, self.Fx, self.Fy, self.M_inv)
 
     def set_property(self, prop, func=None, val=None):
