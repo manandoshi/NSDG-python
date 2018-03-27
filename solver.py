@@ -2,7 +2,7 @@ import numpy as np
 from system import system
 
 
-class convectiveSolver(object):
+class Solver(object):
     def __init__(self,
                  xmin=-1.0, xmax=1.0, nx=3, mx=4,
                  ymin=-1.0, ymax=1.0, ny=3, my=4,
@@ -37,7 +37,36 @@ class convectiveSolver(object):
                 boundaries[var][direction] = {
                     'type': 'dirichlet', 'val': self.product, 'args': list(var)}
         self.system.set_boundaries_multivar(boundaries)
-    
+        self.gen_inv_lap(self,nx,ny,mx,boundaries['P'])
+
+    #Generate inverse laplace matrix with boundaries for Pressure poisson
+    def gen_inv_lap(self,nx,ny,n,P_boundary):
+
+        lap = self.system.lap
+        derx, dery = self.system.global_derx, self.system.global_dery
+
+        lap[:n*nx] = 0
+        lap[:n*nx,:n*nx] = np.eye(n*nx) if P_boundary['S']['type'] == 'dirichlet' else dery[:n*nx,:n*nx]
+        lap[-n*nx:] = 0
+        lap[-n*nx:,-n*nx:] = np.eye(n*nx) if P_boundary['N']['type'] == 'dirichlet' else dery[-n*nx:,-n*nx:]
+
+        lap[::n*nx] = 0
+        lap[::n*nx,::n*nx] = np.eye(n*ny) if P_boundary['W']['type'] == 'dirichlet' else derx[::n*nx,::n*nx]
+        lap[n*nx-1::n*nx] = 0
+        lap[n*nx-1::n*nx,n*nx-1::n*nx] = np.eye(n*ny) if P_boundary['E']['type'] == 'dirichlet' else derx[n*nx-1::n*nx,n*nx-1::n*nx]
+
+        self.inv_lap = np.linalg.pinv(lap)
+
+    def P_solve(self):
+        rhs = -1*self.rho*(self.system.properties['dudx']**2 + self.system.properties['dvdy']**2 + 2*self.system.properties['dudy']*self.properties['dvdx'])
+        
+        rhs[:n*nx]          = 0.0  #S
+        rhs[-n*nx:]         = 0.0 #N
+        rhs[::n*nx]         = 0.0 #W
+        rhs[n*nx-1::n*nx]   = 0.0 #E
+        
+        self.system.properties['P'][:] = self.inv_lap.dot(rhs)
+
     #Utility fn to compute product of two properties
     def product(self, args):
         product = 1.0
@@ -54,10 +83,11 @@ class convectiveSolver(object):
         else:
             return self.diffusion(args,p) - self.advection(args,p)
 
-    
+
     def diffusion(self, args, p):
         px, py = args['d2'+p+'dx2'], args['d2'+p+'dy2']
         return self.k[p]*(px+py)
+
 
     def advection(self, args, p):
         px, py = args['du'+p+'dx'],args['dv'+p+'dy']
@@ -99,25 +129,47 @@ class convectiveSolver(object):
         #This shouldn't be here
         self.system.add_property('d'+p+'dt', func=lambda args:self.compute_dpdt(args, p), arg_params=['d2'+p+'dx2', 'd2'+p+'dy2','du'+p+'dx','dv'+p+'dy'])
 
+
     def RK2_step(self):
         #step1
-        self.compute_terms('T')
-        dTdt   = self.system.properties['dTdt']
-        T      = self.system.properties['T']
-        T_temp = T.copy()
-        T[:]   = T + 0.5*self.dt*dTdt
+        self.compute_terms('u')
+        dudt   = self.system.properties['dudt']
+        u      = self.system.properties['u']
+        u_temp = T.copy()
+        u[:]   = T + 0.5*self.dt*dudt
+
+        self.compute_terms('v')
+        dvdt   = self.system.properties['dvdt']
+        v      = self.system.properties['v']
+        v_temp = T.copy()
+        v[:]   = T + 0.5*self.dt*dvdt
 
         #step2
-        self.compute_terms('T')
-        dTdt   = self.system.properties['dTdt']
-        T[:]   = T_temp + self.dt*dTdt
+        self.compute_terms('u')
+        dudt   = self.system.properties['dudt']
+        u[:]   = u_temp + self.dt*dudt
 
-        del T_temp
+        self.compute_terms('v')
+        dvdt   = self.system.properties['dvdt']
+        v[:]   = v_temp + self.dt*dvdt
+
+        del u_temp
+        del v_temp
         
     def solve(self, Th=10.0, dt=0.10):
-        
+
         self.Th = Th
         self.dt = dt
+        u_temp = self.system.properties['u']
+        v_temp = self.system.properties['v']
+        P_temp = self.system.properties['P']
         for step in xrange(int(Th/dt)):
-            self.RK2_step()
+            while True:
+                self.RK2_step()
+                self.P_solve()
+                if np.max(abs(self.system.properties['P']-P_temp)) < 1e-2:
+                    break
+                P_temp = self.system.properties['P']
+                self.system.properties['u'][:] = u_temp
+                self.system.properties['v'][:] = v_temp
         pass
