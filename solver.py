@@ -17,6 +17,11 @@ class Solver(object):
         self.k = {'T':alpha, 'u':nu, 'v':nu }
         self.rho = rho
 
+        #Temporary
+        self.n = mx
+        self.nx = nx
+        self.ny = ny
+
         self.fluxType = adv_flux
 
         #Adding main variables to system
@@ -25,6 +30,7 @@ class Solver(object):
                 p, func=init[p]["val"], arg_params=init[p]["args"], sample=True)
 
         self.system.set_boundaries_multivar(boundaries)
+        self.gen_inv_lap(nx,ny,mx,boundaries['P'])
 
         boundaries = {}
 
@@ -36,11 +42,12 @@ class Solver(object):
             for direction in ['N', 'E', 'W', 'S']:
                 boundaries[var][direction] = {
                     'type': 'dirichlet', 'val': self.product, 'args': list(var)}
-        self.system.set_boundaries_multivar(boundaries)
-        self.gen_inv_lap(self,nx,ny,mx,boundaries['P'])
+        
 
     #Generate inverse laplace matrix with boundaries for Pressure poisson
     def gen_inv_lap(self,nx,ny,n,P_boundary):
+        import pdb;
+        #pdb.set_trace();
 
         lap = self.system.lap
         derx, dery = self.system.global_derx, self.system.global_dery
@@ -55,17 +62,27 @@ class Solver(object):
         lap[n*nx-1::n*nx] = 0
         lap[n*nx-1::n*nx,n*nx-1::n*nx] = np.eye(n*ny) if P_boundary['E']['type'] == 'dirichlet' else derx[n*nx-1::n*nx,n*nx-1::n*nx]
 
+        #Temperory dirichlet at corner
+        lap[0] = 0
+        lap[0,0] = 1
+
         self.inv_lap = np.linalg.pinv(lap)
 
     def P_solve(self):
-        rhs = -1*self.rho*(self.system.properties['dudx']**2 + self.system.properties['dvdy']**2 + 2*self.system.properties['dudy']*self.properties['dvdx'])
+        rhs = -1*self.rho*(self.system.properties['dudx']**2 + self.system.properties['dvdy']**2 + 2*self.system.properties['dudy']*self.system.properties['dvdx']).ravel()
         
+        n = self.n
+        nx = self.nx
+        ny = self.ny
+        #import pdb;
+        #pdb.set_trace();
+
         rhs[:n*nx]          = 0.0  #S
-        rhs[-n*nx:]         = 0.0 #N
-        rhs[::n*nx]         = 0.0 #W
-        rhs[n*nx-1::n*nx]   = 0.0 #E
-        
-        self.system.properties['P'][:] = self.inv_lap.dot(rhs)
+        rhs[-n*nx:]         = 0.0  #N
+        rhs[::n*nx]         = 0.0  #W
+        rhs[n*nx-1::n*nx]   = 0.0  #E
+        rhs[0] = 0
+        self.system.properties['P'][:] = self.inv_lap.dot(rhs.ravel()).reshape([n*nx,n*ny])
 
     #Utility fn to compute product of two properties
     def product(self, args):
@@ -76,10 +93,10 @@ class Solver(object):
     
     def compute_dpdt(self,args,p):
         if p == 'u':
-            return self.diffusion(args,p) - self.advection(args,p) - (1.0/self.rho)*selp.properties('dPdx')
+            return self.diffusion(args,p) - self.advection(args,p) - (1.0/self.rho)*self.system.properties['dPdx']
 
         if p == 'v':
-            return self.diffusion(args,p) - self.advection(args,p) - (1.0/self.rho)*selp.properties('dPdy')
+            return self.diffusion(args,p) - self.advection(args,p) - (1.0/self.rho)*self.system.properties['dPdy']
         else:
             return self.diffusion(args,p) - self.advection(args,p)
 
@@ -135,14 +152,14 @@ class Solver(object):
         self.compute_terms('u')
         dudt   = self.system.properties['dudt']
         u      = self.system.properties['u']
-        u_temp = T.copy()
-        u[:]   = T + 0.5*self.dt*dudt
+        u_temp = u.copy()
+        u[:]   = u + 0.5*self.dt*dudt
 
         self.compute_terms('v')
         dvdt   = self.system.properties['dvdt']
         v      = self.system.properties['v']
-        v_temp = T.copy()
-        v[:]   = T + 0.5*self.dt*dvdt
+        v_temp = v.copy()
+        v[:]   = v + 0.5*self.dt*dvdt
 
         #step2
         self.compute_terms('u')
@@ -163,13 +180,17 @@ class Solver(object):
         u_temp = self.system.properties['u']
         v_temp = self.system.properties['v']
         P_temp = self.system.properties['P']
+        #import pdb;
+        #pdb.set_trace();
+
         for step in xrange(int(Th/dt)):
             while True:
                 self.RK2_step()
                 self.P_solve()
-                if np.max(abs(self.system.properties['P']-P_temp)) < 1e-2:
+                if np.max(abs(self.system.properties['P']-P_temp)) < 1e-5:
                     break
                 P_temp = self.system.properties['P']
                 self.system.properties['u'][:] = u_temp
                 self.system.properties['v'][:] = v_temp
+            self.RK2_step()
         pass
